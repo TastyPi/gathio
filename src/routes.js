@@ -849,12 +849,12 @@ router.post("/post/reply/:eventID/:commentID", (req, res) => {
           content: `<p>${req.body.replyAuthor} commented: ${req.body.replyContent}</p><p><a href="https://${domain}/${req.params.eventID}/">See the full conversation here.</a></p>`,
         };
         broadcastCreateMessage(jsonObject, event.followers, req.params.eventID);
-        const event = await Event.findOne({ id: req.params.eventID });
-        if (!event) {
+        const freshEvent = await Event.findOne({ id: req.params.eventID });
+        if (!freshEvent) {
           return res.sendStatus(404);
         }
         const attendeeEmails =
-          event.attendees
+          freshEvent.attendees
             .filter((o) => o.status === "attending" && o.email)
             .map((o) => o.email || "") || [];
         if (attendeeEmails.length) {
@@ -862,10 +862,10 @@ router.post("/post/reply/:eventID/:commentID", (req, res) => {
 
           try {
             await req.emailService.sendEmailFromTemplate({
-              to: event?.creatorEmail || config.general.email,
+              to: freshEvent?.creatorEmail || config.general.email,
               bcc: attendeeEmails,
               subject: i18next.t("routes.addeventcommentsubject", {
-                eventName: event.name,
+                eventName: freshEvent.name,
               }),
               templateName: "addEventComment",
               templateData: {

@@ -99,6 +99,21 @@ describe("Events", () => {
     cy.get(".comment").should("contain.text", "Test Comment");
   });
 
+  it("allows you to reply to a comment on an event", function () {
+    cy.get("#commentAuthor").type("Test Author");
+    cy.get("#commentContent").type("Test Comment");
+    cy.get("#postComment").click();
+    cy.get(".comment").should("contain.text", "Test Comment");
+
+    cy.get(".openReplyBox").click();
+    cy.get("#replyAuthor").type("Reply Author");
+    cy.get("#replyContent").type("Test Reply");
+    cy.get("#postReply").click();
+
+    cy.get(".repliesContainer").should("contain.text", "Reply Author");
+    cy.get(".repliesContainer").should("contain.text", "Test Reply");
+  });
+
   it("rejects comments longer than the configured limit", function () {
     cy.setCookie(
       "cypressConfigOverride",
